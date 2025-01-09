@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid rgb(28, 30, 29);
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: rgb(54, 91, 147);
+        }
+    </style>
+</head>
+<body>
+<h1>Pemesanan Produk</h1>
+<form action="/pemesanan/store" method="POST">
+    <div class="mb-3">
+      <label for="order" class="form-label">Tanggal Order</label>
+      <input type="date" class="form-control" id="order" name="order" required />
+    </div>
+    <div class="mb-3">
+      <label for="selesai" class="form-label">Tanggal Selesai</label>
+      <input type="date" class="form-control" id="selesai" name="selesai" required />
+    </div>
+    <div class="mb-3">
+        <label for="batasOrder" class="form-label">Batas Order</label>
+        <input type="text" class="form-control" id="batasOrder" name="batasOrder" required />
+    </div>
+    <div class="mb-3">
+        <label for="produk_id" class="form-label">Produk</label>
+        <select class="form-control" id="produk_id" name="produk_id" required>
+          <option value="">-- Pilih Produk --</option>
+          <% produkList.forEach(produk => { %>
+              <option value="<%= produk._id %>"><%= produk.nama %></option>
+          <% }) %>
+      </select>
+    </div>
+      
+    <button type="submit" class="btn btn-primary">Tambah Pemesanan</button>
+</form>
+  
+<table class="table table-striped">
+    <tr>
+        <th>Tanggal Order</th>
+        <th>Tanggal Selesai</th>
+        <th>Batas Order</th>
+        <th>Nama Produk</th>
+        <th>Aksi</th>
+    </tr>
+    <% pemesanan.forEach(data => {%>
+    <tr>
+        <td><%= data.order %></td>
+        <td><%= data.selesai %></td>
+        <td><%= data.batasOrder %></td>
+        <td><%= data.produk_id && data.produk_id.nama ? data.produk_id.nama : 'Belum ada produk' %></td>
+        <td>
+          <button onclick="showUpdateForm('<%= data._id %>')" class="btn btn-edit">Ubah</button>
+          <button onclick="confirmDelete('<%= data._id %>', '<%= data.order %>')" class="btn btn-danger">Hapus</button>
+      </td>
+    </tr>
+    <tr id="form-<%= data._id %>" style="display: none;">
+      <td colspan="5">
+          <form action="/pemesanan/update" method="POST">
+            <input type="hidden" name="id" value="<%= data._id %>">
+              <div>
+                  <label for="order<%= data._id %>">Tanggal Order:</label>
+                  <input type="text" id="order<%= data._id %>" name="order" value="<%= data.order %>" required>
+              </div>
+              <div>
+                  <label for="selesai<%= data._id %>">Tanggal Selesai:</label>
+                  <input type="text" id="selesai<%= data._id %>" name="selesai" value="<%= data.selesai %>" required>
+              </div>
+              <div>
+                  <label for="batasOrder<%= data._id %>">Batas Order:</label>
+                  <input type="text" id="batasOrder<%= data._id %>" name="batasOrder" value="<%= data.batasOrder %>" required>
+              </div>
+              <div>
+                <label for="produk_id<%= data._id %>">Produk</label>
+                <select id="produk_id<%= data._id %>" name="produk_id" required>
+                    <option value="">-- Pilih Produk --</option>
+                    <% produkList.forEach(produk => { %>
+                        <option value="<%= produk._id %>" <%= produk._id === (data.produk_id ? data.produk_id._id : '') ? 'selected' : '' %>>
+                            <%= produk.nama %>
+                        </option>
+                    <% }) %>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+              <button type="button" onclick="hideUpdateForm('<%= data._id %>')" class="btn btn-secondary">Batal</button>
+          </form>
+      </td>
+  </tr>
+    <% }) %>
+</table>
+
+<script>
+  function showUpdateForm(id) {
+      document.getElementById(`form-${id}`).style.display = "table-row";
+  }
+
+  function hideUpdateForm(id) {
+      document.getElementById(`form-${id}`).style.display = "none";
+  }
+
+  function confirmDelete(id, order) {
+      const confirmed = confirm(`Apakah Anda yakin ingin menghapus pemesanan "${order}"?`);
+      if (confirmed) {
+          window.location.href = `/pemesanan/delete/${id}`;
+      }
+  }
+</script>
+</body>
+</html>
